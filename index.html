@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>English Practice Hub</title>
+<style>
+:root{--green:#58cc02;--green2:#46a302;--greenSoft:#eaf8df;--blue:#4f8cff;--ink:#17212b;--muted:#6b7280;--line:#e8ebef;--bg:#f7f9fc;--card:#fff;--shadow:0 12px 35px rgba(23,33,43,.08)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}body{min-height:100svh}button,a{font:inherit}a{text-decoration:none;color:inherit}
+#splash{position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .45s ease,visibility .45s ease}.splash-inner{text-align:center;width:min(420px,90vw);animation:splashIn .7s cubic-bezier(.2,.8,.2,1)}.logo{width:82px;height:82px;margin:0 auto 22px;border-radius:25px;background:linear-gradient(145deg,var(--green),#7be83a);display:grid;place-items:center;color:#fff;font-size:42px;font-weight:900;box-shadow:0 12px 25px rgba(88,204,2,.25);animation:logoPop .9s ease}.splash-title{font-size:30px;letter-spacing:-1.2px;font-weight:950}.splash-sub{margin-top:8px;color:var(--muted);font-size:14px}.loader{width:150px;height:5px;background:#eef1f4;border-radius:10px;margin:30px auto 0;overflow:hidden}.loader span{display:block;width:35%;height:100%;border-radius:10px;background:var(--green);animation:load 1.2s infinite ease-in-out}.splash-ready{margin-top:14px;color:#9aa1a9;font-size:11px}@keyframes splashIn{from{opacity:0;transform:translateY(15px) scale(.97)}to{opacity:1;transform:none}}@keyframes logoPop{0%{transform:scale(.7);opacity:0}65%{transform:scale(1.08)}100%{transform:scale(1)}}@keyframes load{0%{transform:translateX(-150%)}100%{transform:translateX(430%)}}
+#hub{opacity:0;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease}.ready #hub{opacity:1;transform:none}.hidden{opacity:0!important;visibility:hidden!important;pointer-events:none}
+.nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:12px 18px}.nav-inner{width:min(1100px,100%);margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand-wrap{display:flex;align-items:center;gap:10px}.mini-logo{width:38px;height:38px;border-radius:12px;background:var(--green);color:white;display:grid;place-items:center;font-weight:900}.brand-title{font-weight:900;letter-spacing:-.3px}.brand-caption{font-size:10px;color:#9299a2;margin-top:1px}.focus-btn{border:0;background:#f2f4f6;border-radius:999px;padding:9px 14px;font-weight:800;color:#3f4650;cursor:pointer}
+main{width:min(1100px,100%);margin:auto;padding:26px 18px 60px}.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;align-items:stretch}.hero-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:34px;box-shadow:var(--shadow);overflow:hidden;position:relative}.eyebrow{display:inline-flex;background:var(--greenSoft);color:var(--green2);font-weight:900;font-size:11px;padding:7px 11px;border-radius:999px;letter-spacing:.5px}.hero h1{font-size:clamp(34px,5vw,58px);line-height:.98;letter-spacing:-2.8px;margin:18px 0 14px;max-width:650px}.hero p{font-size:16px;line-height:1.65;color:var(--muted);max-width:600px;margin:0}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.primary{background:var(--green);color:#fff;border:0;border-bottom:4px solid var(--green2);padding:13px 21px;border-radius:15px;font-weight:900;cursor:pointer}.secondary{background:#f3f5f7;color:var(--ink);border:0;padding:13px 21px;border-radius:15px;font-weight:850;cursor:pointer}.hero-art{min-height:320px;background:linear-gradient(145deg,#eaf8df,#f6fbff);display:grid;place-items:center}.art-stack{position:relative;width:250px;height:220px}.floating{position:absolute;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 15px 35px rgba(23,33,43,.10);font-weight:900}.f1{top:8px;left:10px;transform:rotate(-5deg)}.f2{top:82px;right:0;transform:rotate(5deg)}.f3{bottom:2px;left:52px;transform:rotate(-2deg)}.circle{width:70px;height:70px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:32px;margin:auto}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:36px 2px 14px}.section-head h2{font-size:24px;margin:0;letter-spacing:-.8px}.section-head span{font-size:12px;color:#8a919a}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.course{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 7px 22px rgba(23,33,43,.05);display:flex;flex-direction:column;min-height:215px;transition:transform .2s,box-shadow .2s}.course:hover{transform:translateY(-3px);box-shadow:0 15px 30px rgba(23,33,43,.09)}.course-icon{width:48px;height:48px;border-radius:15px;background:var(--greenSoft);display:grid;place-items:center;font-size:24px;margin-bottom:15px}.course h3{margin:0;font-size:17px;letter-spacing:-.3px}.course p{font-size:13px;line-height:1.55;color:var(--muted);margin:7px 0 16px}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}.tag{background:#f3f5f7;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;color:#666e78}.launch{margin-top:14px;width:100%;background:var(--green);color:#fff;border:0;border-bottom:3px solid var(--green2);border-radius:12px;padding:11px;font-weight:900;cursor:pointer}.empty-note{background:#fff;border:1px dashed #d8dde3;border-radius:18px;padding:18px;color:var(--muted);font-size:13px;grid-column:1/-1}
+.footer{padding:35px 0 10px;text-align:center;color:#9aa1a9;font-size:11px}.admin-tip{margin-top:14px;font-size:11px;color:#a0a6ad}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.hero-art{min-height:230px}.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.nav{padding:10px 14px}.brand-caption{display:none}main{padding:18px 13px 45px}.hero-card{padding:24px;border-radius:23px}.hero h1{font-size:42px;letter-spacing:-2px}.hero-art{display:none}.grid{grid-template-columns:1fr}.course{min-height:190px}.section-head{margin-top:28px}.focus-btn{padding:8px 11px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="splash"><div class="splash-inner"><div class="logo">E</div><div class="splash-title">English Practice</div><div class="splash-sub">Learn. Practice. Improve.</div><div class="loader"><span></span></div><div class="splash-ready">Preparing your learning space…</div></div></div>
+<div id="hub">
+<header class="nav"><div class="nav-inner"><div class="brand-wrap"><div class="mini-logo">E</div><div><div class="brand-title">English Practice</div><div class="brand-caption">Independent learning hub</div></div></div><button class="focus-btn" onclick="enterFocus()">⛶ Focus</button></div></header>
+<main>
+<section class="hero"><div class="hero-card"><span class="eyebrow">YOUR PRACTICE HUB</span><h1>Build your English, one practice at a time.</h1><p>Choose a practice app below. Each app can contain its own questions, explanations and learning focus — no account, database or WordPress required.</p><div class="hero-actions"><a class="primary" href="#apps">Browse practice</a><button class="secondary" onclick="enterFocus()">Enter focus mode</button></div></div><div class="hero-card hero-art"><div class="art-stack"><div class="floating f1">✓ Correct</div><div class="floating f2">🔥 Keep going</div><div class="floating f3"><div class="circle">Aa</div></div></div></div></section>
+<section id="apps"><div class="section-head"><h2>Practice apps</h2><span id="appCount"></span></div><div class="grid" id="appGrid"></div></section>
+<div class="footer">Free practice • No student account required • Works on phone, tablet and desktop<div class="admin-tip">Teacher: edit the APP_CATALOG section inside this file to add, remove or rename apps.</div></div>
+</main></div>
+<script>
+/* ==========================================================
+   TEACHER APP CATALOG
+   Add one object for every separate quiz HTML app.
+   The "url" should point to the HTML file in the same GitHub
+   repository, e.g. "zero-conditional.html".
+   ========================================================== */
+const APP_CATALOG = [
+  {
+    title: "English Practice",
+    description: "Mixed English grammar practice with instant feedback and explanations.",
+    level: "A1–B2",
+    questions: "100+ questions",
+    icon: "📚",
+    url: "English_Practice_GitHub_WebApp_v2.html"
+  },
+  {
+    title: "Zero Conditional",
+    description: "Practice facts, routines and general truths using the zero conditional.",
+    level: "A2",
+    questions: "Practice set",
+    icon: "💡",
+    url: "zero-conditional.html"
+  },
+  {
+    title: "Add Your Next App",
+    description: "Duplicate the quiz app, load a different TSV, then add its filename here.",
+    level: "Your level",
+    questions: "Your questions",
+    icon: "＋",
+    url: "#"
+  }
+];
+
+function renderApps(){
+  const grid=document.getElementById('appGrid');
+  document.getElementById('appCount').textContent=APP_CATALOG.length+' learning apps';
+  grid.innerHTML='';
+  APP_CATALOG.forEach((app,i)=>{
+    const card=document.createElement('article');
+    card.className='course';
+    card.innerHTML=`<div class="course-icon">${app.icon||'📘'}</div><h3>${escapeHtml(app.title)}</h3><p>${escapeHtml(app.description)}</p><div class="meta"><span class="tag">${escapeHtml(app.level||'Practice')}</span><span class="tag">${escapeHtml(app.questions||'Questions')}</span></div><button class="launch">Open practice →</button>`;
+    card.querySelector('.launch').onclick=()=>{
+      if(!app.url || app.url==='#'){ alert('Teacher: add the HTML filename for this app in APP_CATALOG.'); return; }
+      window.location.href=app.url;
+    };
+    grid.appendChild(card);
+  });
+}
+function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+async function enterFocus(){
+  try{if(!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();}catch(e){}
+}
+window.addEventListener('load',()=>{
+  renderApps();
+  setTimeout(()=>{document.body.classList.add('ready');document.getElementById('splash').classList.add('hidden');},1300);
+  // Browsers may reject fullscreen until a user gesture; the button remains available.
+  setTimeout(()=>enterFocus(),1400);
+});
+</script>
+</body>
+</html>
