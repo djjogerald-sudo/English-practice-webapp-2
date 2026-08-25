@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>English Practice</title>
+<style>
+:root{
+  --blue:#58cc02; --blue-dark:#46a302; --blue-soft:#e9f8df;
+  --ink:#17212b; --muted:#6b7280; --line:#e5e7eb;
+  --bg:#f7f9fc; --card:#fff; --good:#58cc02; --bad:#ff4b4b;
+  --shadow:0 10px 30px rgba(23,33,43,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{min-height:100svh}
+button{font:inherit}
+#app{min-height:100svh;display:flex;flex-direction:column}
+.header{
+  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);padding:12px max(16px,env(safe-area-inset-left)) 10px;
+}
+.header-inner{width:min(920px,100%);margin:auto;display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center}
+.icon-btn{width:40px;height:40px;border:0;background:#f1f3f5;border-radius:50%;cursor:pointer;color:var(--ink);font-size:18px}
+.brand{font-weight:900;font-size:16px;letter-spacing:-.2px}
+.counter{font-size:12px;font-weight:800;color:var(--muted)}
+.progress{height:7px;background:#edf0f3;border-radius:99px;overflow:hidden;margin-top:10px}
+.progress>i{display:block;height:100%;width:0;background:var(--blue);border-radius:99px;transition:width .25s ease}
+.main{width:min(920px,100%);margin:0 auto;padding:20px 16px calc(28px + env(safe-area-inset-bottom));flex:1}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.badges{display:flex;gap:7px;flex-wrap:wrap}
+.badge{padding:7px 10px;border-radius:999px;background:var(--blue-soft);color:#3e8f08;font-size:11px;font-weight:900}
+.score{font-weight:900;font-size:14px;color:var(--blue-dark)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:24px 18px;margin-bottom:16px}
+.question{font-size:clamp(21px,4vw,30px);line-height:1.35;font-weight:900;letter-spacing:-.45px;text-align:center}
+.blank{color:#3e8f08;border-bottom:3px solid var(--blue);padding:0 5px}
+.prompt{font-size:12px;text-align:center;color:var(--muted);font-weight:700;margin-top:10px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.option{
+  min-height:58px;border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px;
+  display:flex;align-items:center;gap:10px;text-align:left;font-weight:800;color:var(--ink);
+  cursor:pointer;transition:transform .12s,border-color .12s,background .12s,box-shadow .12s;
+}
+.option:active{transform:scale(.985)}
+.option:hover:not(:disabled){border-color:#b9e59e;background:#fbfff8}
+.option:disabled{cursor:default}
+.key{width:28px;height:28px;border-radius:9px;background:#f0f2f4;color:#66707a;display:grid;place-items:center;
+  font-size:11px;font-weight:900;flex:0 0 28px}
+.option.correct{border-color:var(--good);background:#effbe9;box-shadow:0 0 0 2px rgba(88,204,2,.08)}
+.option.correct .key{background:var(--good);color:#fff}
+.option.wrong{border-color:var(--bad);background:#fff0f0;animation:shake .35s}
+.option.wrong .key{background:var(--bad);color:#fff}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.feedback{display:none;border-radius:18px;padding:14px 16px;margin-top:14px;font-size:13px;line-height:1.5}
+.feedback.show{display:block}
+.feedback.good{background:#effbe9;color:#347800;border:1px solid #ccefb8}
+.feedback.bad{background:#fff0f0;color:#a52626;border:1px solid #ffc9c9}
+.feedback strong{display:block;margin-bottom:4px}
+.actions{display:flex;justify-content:center;margin-top:18px}
+.next{display:none;border:0;background:var(--blue);color:#fff;font-weight:900;padding:14px 30px;border-radius:999px;box-shadow:0 5px 0 var(--blue-dark);cursor:pointer}
+.next.show{display:inline-block}
+.footer{text-align:center;color:#9aa1a9;font-size:11px;margin-top:14px}
+#start,#end{
+  position:fixed;inset:0;z-index:100;background:rgba(255,255,255,.98);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.modal{width:min(520px,100%);text-align:center}
+.logo{width:76px;height:76px;border-radius:24px;background:var(--blue);color:#fff;display:grid;place-items:center;
+  margin:0 auto 18px;font-size:38px;font-weight:900;box-shadow:0 8px 0 var(--blue-dark)}
+.modal h1{font-size:32px;margin:0 0 8px;letter-spacing:-1px}
+.modal p{color:var(--muted);line-height:1.55;margin:0 auto 20px;max-width:440px}
+.primary{border:0;background:var(--blue);color:#fff;font-weight:900;padding:15px 34px;border-radius:999px;
+  box-shadow:0 5px 0 var(--blue-dark);cursor:pointer}
+.secondary{margin-top:14px;border:0;background:#f1f3f5;color:var(--ink);font-weight:800;padding:12px 20px;border-radius:999px;cursor:pointer}
+.result-ring{width:126px;height:126px;border:10px solid #e8f7df;border-top-color:var(--blue);border-radius:50%;
+  display:grid;place-items:center;margin:0 auto 18px}
+.result-ring span{font-size:30px;font-weight:900}
+#end{display:none}
+.small{font-size:12px;color:var(--muted);margin-top:14px}
+@media(max-width:620px){
+  .main{padding:14px 12px calc(24px + env(safe-area-inset-bottom))}
+  .card{padding:20px 14px;border-radius:20px}
+  .options{grid-template-columns:1fr}
+  .option{min-height:54px}
+  .question{font-size:22px}
+}
+@media(min-width:621px){.main{padding-top:30px}.card{padding:30px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <div class="header-inner">
+      <button class="icon-btn" id="exitBtn" aria-label="Exit focus mode">×</button>
+      <div class="brand">English Practice</div>
+      <div class="counter" id="counter">1 / 1</div>
+    </div>
+    <div class="progress"><i id="progressBar"></i></div>
+  </header>
+
+  <main class="main">
+    <div class="topline">
+      <div class="badges">
+        <span class="badge" id="categoryBadge">Practice</span>
+        <span class="badge" id="levelBadge">A1</span>
+      </div>
+      <div class="score">⭐ <span id="score">0</span></div>
+    </div>
+
+    <section class="card">
+      <div class="question" id="question">Loading…</div>
+      <div class="prompt">Choose the best answer.</div>
+    </section>
+
+    <section class="options" id="options"></section>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="next" id="nextBtn">Continue</button></div>
+    <div class="footer">Practice mode • Your progress stays on this device only</div>
+  </main>
+</div>
+
+<section id="start" aria-modal="true">
+  <div class="modal">
+    <div class="logo">E</div>
+    <h1>English Practice</h1>
+    <p id="startInfo">Your teacher's practice set is ready. Work through the questions at your own pace.</p>
+    <button class="primary" id="startBtn">Start practice</button>
+    <button class="secondary" id="focusBtn">Enter Focus Mode</button>
+    <div class="small">No account • No database • No upload required</div>
+  </div>
+</section>
+
+<section id="end" aria-modal="true">
+  <div class="modal">
+    <div class="result-ring"><span id="finalPct">0%</span></div>
+    <h1 id="endTitle">Great work!</h1>
+    <p id="endMsg"></p>
+    <button class="primary" id="againBtn">Practice again</button>
+    <div class="small">Your results are calculated in this browser and are not sent anywhere.</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TEACHER CONTENT AREA — EDIT ONLY THIS SECTION
+     Paste your TSV between the backticks below.
+
+     Required columns:
+     Question | Category | Tags | Question explanation |
+     Correct answer (Index) | Answer 1 ... Answer 9
+
+     You can have 2–9 answer columns. The correct answer index
+     starts at 1. Example: Correct answer (Index) = 3 means
+     Answer 3 is correct.
+
+     Because the TSV is embedded in the HTML, students do NOT
+     upload a file. Publish this single HTML file to GitHub Pages.
+     ============================================================ -->
+<script id="embedded-tsv" type="text/plain">
+Question	Category	Tags	Question explanation	Correct answer (Index)	Answer 1	Answer 2	Answer 3	Answer 4	Answer 5	Answer 6	Answer 7	Answer 8	Answer 9
+When my mother is sick, I stay by her side until she is fine.	Zero conditonal context 		-	1.0	Habits and Routines	Law / Rules / Ethics	Facts	Preferences	Requests	Cause and Effects	Advice	General Truth	Instructions
+When Moussa travels long distances, he prefers to take flights.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	Facts	Law / Rules / Ethics	Requests	Cause and Effects	Advice	General Truth	Instructions
+When a country doesn't create jobs, crime increases.	Zero conditonal context 		-	1.0	Cause and Effects	Habits and Routines	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	General Truth	Instructions
+If you heat water to 100°C, it boils.	Zero conditonal context 		-	1.0	Facts	Habits and Routines	Cause and Effects	Law / Rules / Ethics	Instructions	Preferences	Requests	Advice	General Truth
+When I eat too much sugar, I get a headache.	Zero conditonal context 		-	1.0	Cause and Effects	Habits and Routines	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	General Truth	Instructions
+If you mix red and blue, you get purple.	Zero conditonal context 		-	1.0	Facts	General Truth	Habits and Routines	Preferences	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If the students don't study, they fail the exam.	Zero conditonal context 		-	1.0	General Truth	Habits and Routines	Facts	Preferences	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+When the baby is hungry, he always cries.	Zero conditonal context 		-	1.0	Habits and Routines	Facts	Cause and Effects	Preferences	Requests	Law / Rules / Ethics	Advice	General Truth	Instructions
+If you need a password, read the manual.	Zero conditonal context 		-	1.0	Instructions	Advice	Law / Rules / Ethics	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	General Truth
+If you want to pass the test, study every day.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+If you park here, the police give you a fine.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Cause and Effects	Facts	General Truth	Habits and Routines	Preferences	Requests	Advice	Instructions
+When it rains, the grass gets wet.	Zero conditonal context 		-	1.0	Facts	General Truth	Cause and Effects	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If he feels sick, he takes a painkiller.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	Advice	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+When you press that button, the machine starts.	Zero conditonal context 		-	1.0	Instructions	Cause and Effects	Facts	General Truth	Habits and Routines	Preferences	Requests	Advice	Law / Rules / Ethics
+If a car runs out of fuel, it stops.	Zero conditonal context 		-	1.0	Cause and Effects	Facts	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When I have a cold, I drink hot tea.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	Advice	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+If you don't wear a seatbelt, you break the law.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Cause and Effects	General Truth	Facts	Habits and Routines	Preferences	Requests	Advice	Instructions
+If you mix oil and water, they separate.	Zero conditonal context 		-	1.0	Facts	Cause and Effects	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When I go to a new city, I like to visit museums.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	General Truth	Facts	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If you want to save money, cook at home.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+When you cool water to 0°C, it freezes.	Zero conditonal context 		-	1.0	Facts	Cause and Effects	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If you see Sarah, tell her to call me.	Zero conditonal context 		-	1.0	Instructions	Requests	Advice	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+When people don't eat, they get hungry.	Zero conditonal context 		-	1.0	General Truth	Cause and Effects	Facts	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If he is tired, he goes to bed early.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	Advice	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+If you touch a hot stove, you burn your hand.	Zero conditonal context 		-	1.0	Cause and Effects	Facts	General Truth	Law / Rules / Ethics	Habits and Routines	Preferences	Requests	Advice	Instructions
+When she wants to relax, she reads a book.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	Advice	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+If you see smoke, call the fire department.	Zero conditonal context 		-	1.0	Instructions	Advice	Requests	Law / Rules / Ethics	Preferences	Habits and Routines	Facts	Cause and Effects	General Truth
+If you want a quiet life, avoid conflict.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+When you cross the street, you look both ways.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	General Truth	Instructions	Habits and Routines	Facts	Preferences	Requests	Cause and Effects	Advice
+If the sun sets, it gets dark.	Zero conditonal context 		-	1.0	General Truth	Facts	Cause and Effects	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When the kids finish their homework, they play video games.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	Instructions	Advice	Facts	Requests	Cause and Effects	Law / Rules / Ethics	General Truth
+If you don't know the answer, raise your hand.	Zero conditonal context 		-	1.0	Instructions	Advice	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+If you heat metal, it expands.	Zero conditonal context 		-	1.0	Facts	Cause and Effects	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When a light bulb breaks, the room goes dark.	Zero conditonal context 		-	1.0	Cause and Effects	Facts	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If he doesn't drink coffee, he gets sleepy.	Zero conditonal context 		-	1.0	Habits and Routines	Cause and Effects	Preferences	General Truth	Facts	Requests	Advice	Law / Rules / Ethics	Instructions
+If you want to see the doctor, make an appointment first.	Zero conditonal context 		-	1.0	Instructions	Law / Rules / Ethics	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Advice	General Truth
+If you are in doubt, choose the safest option.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Law / Rules / Ethics	Preferences	Habits and Routines	Facts	Cause and Effects	General Truth
+When the road is icy, you drive slowly.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Instructions	Advice	Cause and Effects	Facts	General Truth	Habits and Routines	Preferences	Requests
+If you drop a glass, it breaks.	Zero conditonal context 		-	1.0	General Truth	Cause and Effects	Facts	Law / Rules / Ethics	Habits and Routines	Preferences	Requests	Advice	Instructions
+When my phone is dead, I feel disconnected.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	Cause and Effects	General Truth	Facts	Requests	Law / Rules / Ethics	Advice	Instructions
+If you want a promotion, you work hard.	Zero conditonal context 		-	1.0	General Truth	Advice	Habits and Routines	Cause and Effects	Facts	Requests	Preferences	Law / Rules / Ethics	Instructions
+If the oven gets too hot, the cake burns.	Zero conditonal context 		-	1.0	Cause and Effects	Facts	General Truth	Instructions	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice
+When I am stressed, I go for a walk.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	Advice	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+If you enter the code, the door opens.	Zero conditonal context 		-	1.0	Instructions	Cause and Effects	Facts	General Truth	Habits and Routines	Preferences	Requests	Advice	Law / Rules / Ethics
+If you find a wallet, take it to the police.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Instructions	Advice	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	General Truth
+If a snake is scared, it bites.	Zero conditonal context 		-	1.0	Facts	General Truth	Cause and Effects	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When he plays soccer, he wears his lucky jersey.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	General Truth	Facts	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If you like classical music, you enjoy this concert.	Zero conditonal context 		-	1.0	General Truth	Preferences	Advice	Habits and Routines	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+When a government raises taxes, people complain.	Zero conditonal context 		-	1.0	Cause and Effects	General Truth	Habits and Routines	Law / Rules / Ethics	Facts	Preferences	Requests	Advice	Instructions
+If you have an emergency, dial 911.	Zero conditonal context 		-	1.0	Instructions	Law / Rules / Ethics	Requests	Advice	Preferences	Habits and Routines	Facts	Cause and Effects	General Truth
+If you don't brush your teeth, you get cavities.	Zero conditonal context 		-	1.0	Cause and Effects	Facts	General Truth	Advice	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Instructions
+When I get a bonus, I prefer to save it.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	General Truth	Facts	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If a car needs maintenance, it performs badly.	Zero conditonal context 		-	1.0	General Truth	Cause and Effects	Facts	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If you want peace of mind, meditate daily.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+When the temperature drops below zero, the water in the pipes freezes.	Zero conditonal context 		-	1.0	Facts	Cause and Effects	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If a dog feels threatened by a stranger, it usually barks loudly.	Zero conditonal context 		-	1.0	Habits and Routines	Cause and Effects	General Truth	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+"If the ""check engine"" light comes on in your car, you take it to a mechanic."	Zero conditonal context 		-	1.0	Advice	Instructions	Law / Rules / Ethics	General Truth	Facts	Preferences	Requests	Cause and Effects	Habits and Routines
+When the manager leaves the office, his assistant handles all the incoming calls.	Zero conditonal context 		-	1.0	Habits and Routines	Instructions	Law / Rules / Ethics	General Truth	Facts	Preferences	Requests	Cause and Effects	Advice
+If you are cycling at night, you must use lights for safety reasons.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Advice	Instructions	General Truth	Facts	Preferences	Requests	Cause and Effects	Habits and Routines
+If you want to turn on the television, you press the red power button.	Zero conditonal context 		-	1.0	Instructions	Cause and Effects	General Truth	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	Habits and Routines
+When I travel to warm climates, I choose light cotton clothes over heavy fabrics.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	General Truth	Facts	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If you mix yellow and blue paint together, the result is always green.	Zero conditonal context 		-	1.0	Facts	General Truth	Cause and Effects	Instructions	Preferences	Requests	Law / Rules / Ethics	Advice	Habits and Routines
+When I am working on a difficult project, I avoid using my phone for distractions.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	Advice	Instructions	Facts	Requests	Cause and Effects	Law / Rules / Ethics	General Truth
+If the airline loses your luggage, they pay you compensation.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Cause and Effects	General Truth	Facts	Habits and Routines	Preferences	Requests	Advice	Instructions
+If you take a deep breath and count to ten, you feel calmer immediately.	Zero conditonal context 		-	1.0	Advice	Instructions	Cause and Effects	General Truth	Facts	Preferences	Requests	Law / Rules / Ethics	Habits and Routines
+When the wind blows strongly, the old tree near the house shakes violently.	Zero conditonal context 		-	1.0	Cause and Effects	General Truth	Facts	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If a customer is not satisfied with the service, he can speak to the supervisor.	Zero conditonal context 		-	1.0	Instructions	Law / Rules / Ethics	General Truth	Facts	Preferences	Requests	Cause and Effects	Advice	Habits and Routines
+If people eat a lot of fast food, they generally gain weight over time.	Zero conditonal context 		-	1.0	General Truth	Cause and Effects	Facts	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When I am trying to learn a new language, I prefer to watch movies with subtitles.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	Advice	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+If you don't know how to pronounce a word, you look it up in the dictionary.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+If you use this special keycard, the inner doors of the building unlock.	Zero conditonal context 		-	1.0	Cause and Effects	Instructions	Facts	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice
+When I visit my grandmother, she always bakes my favorite cookies for me.	Zero conditonal context 		-	1.0	Habits and Routines	Preferences	General Truth	Facts	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If you break a rule during the game, the referee immediately issues a penalty.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Instructions	Cause and Effects	General Truth	Facts	Preferences	Requests	Advice	Habits and Routines
+If the machine stops working, turn it off and turn it on again.	Zero conditonal context 		-	1.0	Instructions	Advice	Cause and Effects	General Truth	Facts	Preferences	Requests	Law / Rules / Ethics	Habits and Routines
+When my parents go on vacation, they ask my neighbor to feed their cat.	Zero conditonal context 		-	1.0	Habits and Routines	Requests	Instructions	General Truth	Facts	Preferences	Cause and Effects	Law / Rules / Ethics	Advice
+If a public figure says something controversial, the public reacts quickly on social media.	Zero conditonal context 		-	1.0	Cause and Effects	General Truth	Habits and Routines	Facts	Law / Rules / Ethics	Preferences	Requests	Advice	Instructions
+If you are in a foreign country and need help, you should find your embassy.	Zero conditonal context 		-	1.0	Advice	Instructions	Law / Rules / Ethics	General Truth	Facts	Preferences	Requests	Cause and Effects	Habits and Routines
+If you don't have enough sleep, your concentration suffers the next day.	Zero conditonal context 		-	1.0	General Truth	Cause and Effects	Facts	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When I cook pasta, I always add a pinch of salt to the water.	Zero conditonal context 		-	1.0	Habits and Routines	Instructions	Preferences	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Advice
+If the flight is delayed, the passengers usually get a voucher for food and drinks.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Cause and Effects	Instructions	General Truth	Facts	Preferences	Requests	Advice	Habits and Routines
+If you need the elevator, press the button and wait for the chime.	Zero conditonal context 		-	1.0	Instructions	Cause and Effects	General Truth	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	Habits and Routines
+When a battery is fully charged, its indicator light turns green.	Zero conditonal context 		-	1.0	Facts	General Truth	Cause and Effects	Instructions	Preferences	Requests	Law / Rules / Ethics	Advice	Habits and Routines
+If the presentation runs too long, the audience starts to lose interest.	Zero conditonal context 		-	1.0	Cause and Effects	General Truth	Habits and Routines	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If you buy two tickets for the show, you get the third one for free.	Zero conditonal context 		-	1.0	General Truth	Law / Rules / Ethics	Habits and Routines	Facts	Preferences	Requests	Cause and Effects	Advice	Instructions
+When she wants to buy new clothes, she prefers to shop at small, independent stores.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	Advice	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Instructions
+If you want to improve your score, review your weakest topics before the exam.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+When a river overflows its banks, it causes widespread flooding in the area.	Zero conditonal context 		-	1.0	Cause and Effects	Facts	General Truth	Law / Rules / Ethics	Habits and Routines	Preferences	Requests	Advice	Instructions
+If the security alarm goes off, all doors lock automatically.	Zero conditonal context 		-	1.0	Instructions	Law / Rules / Ethics	Cause and Effects	General Truth	Facts	Preferences	Requests	Advice	Habits and Routines
+If a journalist publishes false information, the newspaper faces a lawsuit.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	Cause and Effects	General Truth	Facts	Habits and Routines	Preferences	Requests	Advice	Instructions
+When he goes to the gym, he does his cardio exercises before his weight training.	Zero conditonal context 		-	1.0	Habits and Routines	Instructions	Preferences	General Truth	Facts	Requests	Cause and Effects	Law / Rules / Ethics	Advice
+If you are trying to lose weight, avoid sugary drinks.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+If a website doesn't look secure, you shouldn't enter your credit card details.	Zero conditonal context 		-	1.0	Advice	Law / Rules / Ethics	General Truth	Facts	Preferences	Requests	Cause and Effects	Instructions	Habits and Routines
+When glass is exposed to intense heat, it begins to melt.	Zero conditonal context 		-	1.0	Facts	General Truth	Cause and Effects	Instructions	Preferences	Requests	Law / Rules / Ethics	Advice	Habits and Routines
+If you forget to charge your electric toothbrush, it doesn't work the next morning.	Zero conditonal context 		-	1.0	Cause and Effects	General Truth	Habits and Routines	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+When my brother visits, he wants to go to the new Italian restaurant.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	General Truth	Facts	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If you need to reset your password, click the 'Forgot Password' link.	Zero conditonal context 		-	1.0	Instructions	Cause and Effects	General Truth	Facts	Preferences	Requests	Law / Rules / Ethics	Advice	Habits and Routines
+When I receive an email from my boss, I reply within ten minutes.	Zero conditonal context 		-	1.0	Habits and Routines	Law / Rules / Ethics	Instructions	General Truth	Facts	Preferences	Requests	Cause and Effects	Advice
+If the contract is not signed by both parties, it is not legally binding.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	General Truth	Facts	Cause and Effects	Habits and Routines	Preferences	Requests	Advice	Instructions
+If a country relies heavily on oil exports, the economy suffers when prices fall.	Zero conditonal context 		-	1.0	General Truth	Cause and Effects	Facts	Law / Rules / Ethics	Habits and Routines	Preferences	Requests	Advice	Instructions
+When the boss is late, the meeting starts without him.	Zero conditonal context 		-	1.0	Habits and Routines	Instructions	Law / Rules / Ethics	General Truth	Facts	Preferences	Requests	Cause and Effects	Advice
+If you are driving a rental car, you pay for any damage you cause.	Zero conditonal context 		-	1.0	Law / Rules / Ethics	General Truth	Facts	Cause and Effects	Habits and Routines	Preferences	Requests	Advice	Instructions
+If the noise is too loud, use earplugs.	Zero conditonal context 		-	1.0	Advice	Instructions	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+If the kitchen is very hot, the butter melts quickly.	Zero conditonal context 		-	1.0	Cause and Effects	Facts	General Truth	Instructions	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice
+When I go to the market, I prefer to buy fresh, local produce.	Zero conditonal context 		-	1.0	Preferences	Habits and Routines	General Truth	Facts	Requests	Cause and Effects	Advice	Law / Rules / Ethics	Instructions
+If the child eats certain nuts, he gets a serious allergic reaction.	Zero conditonal context 		-	1.0	Facts	Cause and Effects	General Truth	Habits and Routines	Preferences	Requests	Law / Rules / Ethics	Advice	Instructions
+If you receive a package, open it carefully using a box cutter.	Zero conditonal context 		-	1.0	Instructions	Advice	Requests	Preferences	Habits and Routines	Facts	Cause and Effects	Law / Rules / Ethics	General Truth
+</script>
+
+<script>
+'use strict';
+
+/* ---------- APP CONFIG ---------- */
+const CONFIG = {
+  title: 'English Practice',
+  shuffleQuestions: false,
+  shuffleAnswers: true,
+  autoFullscreen: true,
+  showExplanation: true,
+  keyboardShortcuts: true
+};
+
+/* ---------- TSV ENGINE ---------- */
+function parseTSV(text){
+  const lines = text.replace(/\r/g,'').split('\n').filter(line => line.trim());
+  if(!lines.length) return [];
+  const headers = splitTSV(lines[0]).map(clean);
+  return lines.slice(1).map(line => {
+    const values = splitTSV(line);
+    const row = {};
+    headers.forEach((h,i) => row[h] = clean(values[i] ?? ''));
+    return row;
+  }).filter(row => row['Question']);
+}
+function splitTSV(line){
+  const out=[]; let cur=''; let quoted=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c === '"'){
+      if(quoted && line[i+1] === '"'){cur+='"';i++;continue;}
+      quoted=!quoted; continue;
+    }
+    if(c === '\t' && !quoted){out.push(cur);cur='';}
+    else cur+=c;
+  }
+  out.push(cur); return out;
+}
+function clean(v){return String(v).trim().replace(/^"(.*)"$/,'$1');}
+
+function makeQuestions(){
+  const rows = parseTSV(document.getElementById('embedded-tsv').textContent);
+  return rows.map((r,n)=>{
+    const optionKeys = Object.keys(r).filter(k => /^Answer \d+$/i.test(k))
+      .sort((a,b)=>Number(a.match(/\d+/)[0])-Number(b.match(/\d+/)[0]));
+    const options = optionKeys.map(k=>r[k]).filter(Boolean);
+    const correctIndex = Math.max(0, Number(r['Correct answer (Index)'] || 1)-1);
+    return {
+      id:n+1,
+      question:r['Question'] || '',
+      category:r['Category'] || r['Topic'] || 'Practice',
+      level:r['Level'] || r['Tags'] || '',
+      explanation:r['Question explanation'] || r['Explanation'] || '',
+      options,
+      correct: options[correctIndex] ?? options[0]
+    };
+  }).filter(q=>q.question && q.options.length >= 2);
+}
+
+/* ---------- STATE ---------- */
+let questions = makeQuestions();
+let current = 0;
+let score = 0;
+let answered = false;
+let shuffledOptions = [];
+
+const $ = id => document.getElementById(id);
+
+/* ---------- FULLSCREEN ---------- */
+async function enterFullscreen(){
+  try{
+    if(document.fullscreenElement) return true;
+    if(document.documentElement.requestFullscreen){
+      await document.documentElement.requestFullscreen();
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function leaveFullscreen(){
+  try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){}
+}
+
+/* Browsers, especially iOS Safari, may block automatic fullscreen.
+   The first user tap on Start/Foc​us Mode retries it. */
+window.addEventListener('load', ()=>{
+  if(CONFIG.autoFullscreen) setTimeout(enterFullscreen,250);
+});
+
+/* ---------- QUIZ ---------- */
+function start(){
+  questions = makeQuestions();
+  if(!questions.length){
+    $('startInfo').textContent='No valid questions were found in the embedded TSV.';
+    $('startBtn').disabled=true;
+    return;
+  }
+  if(CONFIG.shuffleQuestions){
+    questions = [...questions].sort(()=>Math.random()-.5);
+  }
+  current=0; score=0;
+  $('score').textContent='0';
+  $('start').style.display='none';
+  $('end').style.display='none';
+  enterFullscreen();
+  render();
+}
+function render(){
+  const q=questions[current];
+  answered=false;
+  $('counter').textContent=`${current+1} / ${questions.length}`;
+  $('progressBar').style.width=`${((current)/questions.length)*100}%`;
+  $('categoryBadge').textContent=q.category || 'Practice';
+  $('levelBadge').textContent=q.level || 'Practice';
+  $('question').innerHTML=makeQuestionHTML(q.question);
+  $('feedback').className='feedback';
+  $('feedback').innerHTML='';
+  $('nextBtn').className='next';
+
+  shuffledOptions=[...q.options];
+  if(CONFIG.shuffleAnswers) shuffledOptions.sort(()=>Math.random()-.5);
+
+  const box=$('options'); box.innerHTML='';
+  shuffledOptions.forEach((option,i)=>{
+    const b=document.createElement('button');
+    b.className='option';
+    b.innerHTML=`<span class="key">${i+1}</span><span>${escapeHTML(option)}</span>`;
+    b.addEventListener('click',()=>answer(option,b));
+    box.appendChild(b);
+  });
+}
+function makeQuestionHTML(text){
+  const safe=escapeHTML(text);
+  return safe.replace(/______+/g,'<span class="blank">______</span>');
+}
+function answer(selected,button){
+  if(answered) return;
+  answered=true;
+  const q=questions[current];
+  document.querySelectorAll('.option').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.option').forEach(b=>{
+    const value=b.querySelector('span:last-child').textContent;
+    if(value===q.correct) b.classList.add('correct');
+  });
+  const correct=selected===q.correct;
+  if(correct){
+    score++;
+    button.classList.add('correct');
+    showFeedback(true,'Correct!', q.explanation);
+  }else{
+    button.classList.add('wrong');
+    showFeedback(false,`Not quite. The best answer is “${q.correct}”.`, q.explanation);
+  }
+  $('score').textContent=score;
+  $('progressBar').style.width=`${((current+1)/questions.length)*100}%`;
+  $('nextBtn').className='next show';
+  $('nextBtn').textContent=current===questions.length-1?'See results':'Continue';
+}
+function showFeedback(good,title,explanation){
+  const f=$('feedback');
+  f.className='feedback show '+(good?'good':'bad');
+  f.innerHTML=`<strong>${escapeHTML(title)}</strong>${CONFIG.showExplanation && explanation && explanation!=='-' ? escapeHTML(explanation):''}`;
+}
+function next(){
+  if(!answered) return;
+  if(current>=questions.length-1){finish();return;}
+  current++;
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function finish(){
+  const pct=Math.round((score/questions.length)*100);
+  $('finalPct').textContent=pct+'%';
+  $('endTitle').textContent=pct===100?'Perfect score!':pct>=80?'Excellent work!':pct>=60?'Good progress!':'Keep practicing!';
+  $('endMsg').textContent=`You got ${score} out of ${questions.length} questions correct.`;
+  $('end').style.display='flex';
+}
+function restart(){
+  $('end').style.display='none';
+  start();
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+/* ---------- EVENTS ---------- */
+$('startBtn').addEventListener('click',start);
+$('focusBtn').addEventListener('click',()=>{enterFullscreen();start();});
+$('nextBtn').addEventListener('click',next);
+$('againBtn').addEventListener('click',restart);
+$('exitBtn').addEventListener('click',()=>{
+  leaveFullscreen();
+  $('end').style.display='none';
+  $('start').style.display='flex';
+});
+document.addEventListener('keydown',e=>{
+  if(!CONFIG.keyboardShortcuts || $('start').style.display!=='none' || $('end').style.display==='flex') return;
+  if(e.key>='1' && e.key<='9' && !answered){
+    const i=Number(e.key)-1;
+    const btn=document.querySelectorAll('.option')[i];
+    if(btn) btn.click();
+  }else if(e.key==='Enter' && answered) next();
+});
+
+/* ---------- STUDENT-FRIENDLY STATUS ---------- */
+$('startInfo').textContent =
+  `${questions.length} questions are ready. Your teacher has already loaded the practice set — just start.`;
+</script>
+</body>
+</html>
