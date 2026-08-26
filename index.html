@@ -32,8 +32,12 @@ async function load(){
     apps=[]; render(); return;
   }
   let ms;
-  try{ ms=await manifestRes.json(); }
-  catch(e){ loadErrors.push('quizzes.json is not valid JSON'); apps=[]; render(); return; }
+  try{
+    let mtext=await manifestRes.text();
+    mtext=mtext.replace(/^\uFEFF/,'').trim();
+    ms=JSON.parse(mtext);
+  }
+  catch(e){ loadErrors.push('quizzes.json is not valid JSON — '+(e&&e.message||e)+'. Open it in a plain text editor (not Word/Notes) and check for a stray comma, quote, or hidden character.'); apps=[]; render(); return; }
   if(!Array.isArray(ms)){
     loadErrors.push('quizzes.json must contain an array');
     apps=[]; render(); return;
