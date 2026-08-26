@@ -1,0 +1,15 @@
+{
+  "name": "Mylingo \u2014 English Practice Hub",
+  "short_name": "Mylingo",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1959d1",
+  "icons": [
+    {
+      "src": "mylingo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
