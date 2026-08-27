@@ -18,6 +18,13 @@
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 body{min-height:100svh}
+body{opacity:0;transition:opacity .32s cubic-bezier(.4,0,.2,1)}
+body.ready{opacity:1}
+#start,#end{transition:opacity .28s ease}
+.brand{cursor:pointer}
+.home-link{display:inline-block;margin-top:10px;border:0;background:none;color:var(--muted);font-weight:800;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px 0}
+#quizMain{transition:opacity .16s ease}
+.blank.filled{color:var(--blue-dark);border-bottom-color:var(--blue-dark);font-weight:900}
 button{font:inherit}
 #app{min-height:100svh;display:flex;flex-direction:column}
 .header{
@@ -100,13 +107,13 @@ button{font:inherit}
   <header class="header">
     <div class="header-inner">
       <button class="icon-btn" id="exitBtn" aria-label="Exit focus mode">×</button>
-      <div class="brand">Mylingo · Comparative Adjectives</div>
+      <div class="brand" id="brandHome">Mylingo · Comparative Adjectives</div>
       <div class="counter" id="counter">1 / 1</div>
     </div>
     <div class="progress"><i id="progressBar"></i></div>
   </header>
 
-  <main class="main">
+  <main class="main" id="quizMain">
     <div class="topline">
       <div class="badges">
         <span class="badge" id="categoryBadge">Practice</span>
@@ -135,6 +142,7 @@ button{font:inherit}
     <button class="primary" id="startBtn">Start Quiz</button>
     <button class="secondary" id="focusBtn">Enter Focus Mode</button>
     <div class="small">No account • No database • No upload required</div>
+    <button class="home-link" id="homeBtnStart">← Back to Mylingo home</button>
   </div>
 </section>
 
@@ -144,6 +152,7 @@ button{font:inherit}
     <h1 id="endTitle">Great work!</h1>
     <p id="endMsg"></p>
     <button class="primary" id="againBtn">Try Again</button>
+    <button class="secondary" id="homeBtnEnd">Back to Mylingo</button>
     <div class="small">Your results are calculated in this browser and are not sent anywhere.</div>
   </div>
 </section>
@@ -321,11 +330,25 @@ function start(){
   }
   const resumed=resumeMP(); if(!resumed){current=0;score=0;}
   $('score').textContent=String(score);
-  $('start').style.display='none';
-  $('end').style.display='none';
+  hideOverlay($('start'));
+  hideOverlay($('end'));
   saveMP(false);
   enterFullscreen();
   render();
+}
+function hideOverlay(el){
+  if(el.style.display==='none') return;
+  el.style.opacity='0';
+  setTimeout(()=>{ el.style.display='none'; el.style.opacity=''; },280);
+}
+function showOverlay(el){
+  el.style.display='flex';
+  el.style.opacity='0';
+  requestAnimationFrame(()=>{ el.style.opacity='1'; });
+}
+function goHome(){
+  document.body.style.opacity='0';
+  setTimeout(()=>{ location.href='./index.html'; },260);
 }
 function render(){
   const q=questions[current];
@@ -355,6 +378,9 @@ function makeQuestionHTML(text){
   const safe=escapeHTML(text);
   return safe.replace(/______+/g,'<span class="blank">______</span>');
 }
+function fillBlank(html,answerText){
+  return html.replace(/<span class="blank">______<\/span>/g,`<span class="blank filled">${escapeHTML(answerText)}</span>`);
+}
 function answer(selected,button){
   if(answered) return;
   answered=true;
@@ -365,6 +391,7 @@ function answer(selected,button){
     if(value===q.correct) b.classList.add('correct');
   });
   const correct=selected===q.correct;
+  $('question').innerHTML=fillBlank($('question').innerHTML,q.correct);
   if(correct){
     playCorrectSound();
     score++;
@@ -391,7 +418,9 @@ function next(){
   if(current>=questions.length-1){finish();return;}
   current++;
   saveMP(false);
-  render();
+  const m=$('quizMain');
+  m.style.opacity='0';
+  setTimeout(()=>{ render(); m.style.opacity='1'; },170);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function finish(){
@@ -400,10 +429,10 @@ function finish(){
   $('endTitle').textContent=pct===100?'Perfect score!':pct>=80?'Excellent work!':pct>=60?'Good progress!':'Keep practicing!';
   $('endMsg').textContent=`You got ${score} out of ${questions.length} questions correct.`;
   saveMP(true);
-  $('end').style.display='flex';
+  showOverlay($('end'));
 }
 function restart(){
-  $('end').style.display='none';
+  hideOverlay($('end'));
   start();
 }
 function escapeHTML(s){
@@ -417,9 +446,12 @@ $('nextBtn').addEventListener('click',next);
 $('againBtn').addEventListener('click',restart);
 $('exitBtn').addEventListener('click',()=>{
   leaveFullscreen();
-  $('end').style.display='none';
-  $('start').style.display='flex';
+  hideOverlay($('end'));
+  showOverlay($('start'));
 });
+$('brandHome').addEventListener('click',goHome);
+$('homeBtnStart').addEventListener('click',goHome);
+$('homeBtnEnd').addEventListener('click',goHome);
 document.addEventListener('keydown',e=>{
   if(!CONFIG.keyboardShortcuts || $('start').style.display!=='none' || $('end').style.display==='flex') return;
   if(e.key>='1' && e.key<='9' && !answered){
@@ -432,6 +464,7 @@ document.addEventListener('keydown',e=>{
 /* ---------- STUDENT-FRIENDLY STATUS ---------- */
 $('startInfo').textContent =
   `${questions.length} questions are ready. Your teacher has already loaded the practice set — just start.`;
+requestAnimationFrame(()=>document.body.classList.add('ready'));
 </script>
 </body>
 </html>
