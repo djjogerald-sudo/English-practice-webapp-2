@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relative Pronouns Quiz Engine</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --correct: #16a34a;
+      --correct-bg: #f0fdf4;
+      --incorrect: #dc2626;
+      --incorrect-bg: #fef2f2;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; display: flex; justify-content: center; }
+    
+    .quiz-container { width: 100%; max-width: 680px; background: var(--card-bg); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+    
+    .quiz-title-header { margin-bottom: 1.25rem; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem; }
+    .quiz-title-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .badge { background: #e0e7ff; color: var(--primary); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; }
+    
+    .progress-bar { height: 6px; width: 100%; background: #e2e8f0; border-radius: 3px; margin-bottom: 1.5rem; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease; }
+
+    .question-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.5; }
+
+    .options-grid { display: grid; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .option-btn {
+      width: 100%; text-align: left; padding: 0.875rem 1rem; border: 1px solid var(--border);
+      background: #fff; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: all 0.2s ease;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #f5f3ff; }
+    .option-btn:disabled { cursor: default; }
+
+    .option-btn.correct { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); font-weight: 600; }
+    .option-btn.incorrect { background: var(--incorrect-bg); border-color: var(--incorrect); color: var(--incorrect); }
+
+    .explanation-box {
+      padding: 1rem; border-radius: 8px; background: #f1f5f9; border-left: 4px solid var(--primary);
+      margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.4; display: none;
+    }
+
+    .footer { display: flex; justify-content: flex-end; }
+    .next-btn {
+      background: var(--primary); color: #fff; border: none; padding: 0.75rem 1.5rem;
+      border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .next-btn:hover { background: var(--primary-hover); }
+
+    .results-card { text-align: center; padding: 1rem 0; }
+    .score-circle {
+      width: 120px; height: 120px; border-radius: 50%; background: #e0e7ff; color: var(--primary);
+      display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; margin: 1.5rem auto;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <!-- Quiz Title Banner -->
+  <div class="quiz-title-header">
+    <h1 id="quiz-name">Relative Pronouns Quiz</h1>
+  </div>
+
+  <div id="quiz-ui">
+    <div class="header">
+      <div>
+        <span id="topic-badge" class="badge">Topic</span>
+        <span id="level-badge" class="badge" style="background:#f3e8ff; color:#7e22ce;">Level</span>
+      </div>
+      <span id="counter" style="font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">1 / --</span>
+    </div>
+
+    <div class="progress-bar">
+      <div id="progress" class="progress-fill"></div>
+    </div>
+
+    <div id="question-text" class="question-title">Loading questions...</div>
+
+    <div id="options-container" class="options-grid"></div>
+
+    <div id="explanation" class="explanation-box"></div>
+
+    <div class="footer">
+      <button id="next-btn" class="next-btn" style="display: none;">Next Question</button>
+    </div>
+  </div>
+
+  <div id="results-ui" class="results-card" style="display: none;">
+    <h2>Quiz Completed!</h2>
+    <div id="score" class="score-circle">0%</div>
+    <p id="score-details" style="color: var(--text-muted); margin-bottom: 1.5rem;"></p>
+    <button class="next-btn" onclick="location.reload()">Restart Quiz</button>
+  </div>
+</div>
+
+<script>
+  // Structured Quiz Package Object with Name
+  const quizPackage = {
+    quizName: "English Grammar: Relative Pronouns Mastery",
+    rawTSVData: `Choose the correct relative pronoun<br>The woman ___ lives next door is a nurse.	Relative Pronouns	A2	We use <b>Who</b> to refer to a person as the subject of the clause.	1	who	which	where	whose
+Complete the sentence<br>This is the book ___ I told you about yesterday.	Relative Pronouns	A2	The pronoun <b>That</b> can refer to people or things as an object.	1	that	who	where	whose
+I met a teacher ___ helps students after class.	Relative Pronouns	A2	<b>Who</b> is used for people <b>Where</b> it is the subject of the clause.	1	who	which	that	where
+She bought a phone ___ was very expensive.	Relative Pronouns	A2	<b>Which</b> is used for things as the subject of a relative clause.	1	which	who	where	whose
+Complete the sentence<br>That is the school ___ my sister studies.	Relative Pronouns	A2	<b>Where</b> is used to talk about places.	1	where	which	who	that
+The man ___ car was stolen called the police.	Relative Pronouns	B1	<b>Who</b>se shows possession.	1	whose	who	which	that
+I like people ___ are honest.	Relative Pronouns	A2	<b>Who</b> is used for people in the subject position.	1	who	which	where	whose
+Complete the sentence<br>This is the movie ___ made me cry.	Relative Pronouns	A2	<b>That</b> is common in spoken English for things.	1	that	who	where	whose
+She visited the city ___ she was born.	Relative Pronouns	A2	<b>Where</b> refers to a place.	1	where	which	who	that
+The student ___ answers are always correct is very smart.	Relative Pronouns	B1	<b>Who</b>se shows possession with people or things.	1	whose	who	which	where
+I have a friend ___ works at the hospital.	Relative Pronouns	A2	<b>Who</b> is used for people as the subject.	1	who	which	where	whose
+Complete the sentence<br>This is the house ___ Jack built.	Relative Pronouns	A2	<b>That</b> or <b>Which</b> can be used for things as objects.	1	that	who	where	whose
+The dog ___ barked all night kept us awake.	Relative Pronouns	A2	Animals are treated as things, so <b>Which</b> is correct.	1	which	who	where	whose
+She spoke to the woman ___ son won the prize.	Relative Pronouns	B1	<b>Who</b>se indicates ownership or relationship.	1	whose	who	which	that
+Complete the sentence<br>That is the reason ___ I left early.	Relative Pronouns	B1	<b>Why</b> explains a reason.	1	why	which	who	where
+The teacher ___ you met yesterday is absent today.	Relative Pronouns	B1	<b>Who</b> refers to a person as the object of the clause.	1	who	which	where	whose
+This is the restaurant ___ we had dinner last night.	Relative Pronouns	A2	<b>Where</b> is used for locations.	1	where	which	who	whose
+The book ___ cover is blue belongs to me.	Relative Pronouns	B1	<b>Who</b>se expresses possession for things.	1	whose	which	who	where
+Complete the sentence<br>I remember the day ___ we first met.	Relative Pronouns	A2	<b>Where</b> refers to time.	1	when	which	who	where
+The girl ___ won the race is my cousin.	Relative Pronouns	A2	<b>Who</b> is used for people as the subject.	1	who	which	whose	where
+This is the job ___ I applied for.	Relative Pronouns	B1	<b>That</b> is natural in spoken English for objects.	1	that	who	where	whose
+Complete the sentence<br>The man ___ you are talking to is my uncle.	Relative Pronouns	B1	<b>Who</b> refers to a person as the object.	1	who	which	where	whose
+This is the country ___ I would like to visit.	Relative Pronouns	A2	<b>That</b> or <b>Which</b> can refer to places as things.	1	that	who	where	whose
+She knows a doctor ___ works night shifts.	Relative Pronouns	A2	<b>Who</b> is used for people as the subject.	1	who	which	where	whose
+Complete the sentence<br>The hotel ___ we stayed was very comfortable.	Relative Pronouns	A2	<b>Where</b> refers to a place.	1	where	which	who	whose
+The boy ___ bike is broken is late.	Relative Pronouns	B1	<b>Who</b>se shows possession.	1	whose	who	which	where
+This is the story ___ everyone remembers.	Relative Pronouns	A2	<b>That</b> is commonly used for things as objects.	1	that	who	where	whose
+Complete the sentence<br>The woman ___ lives upstairs plays the piano.	Relative Pronouns	A2	<b>Who</b> is used for people as subjects.	1	who	which	where	whose
+I like music ___ makes me relaxed.	Relative Pronouns	A2	<b>That</b> or <b>Which</b> can be used for things.	1	that	who	where	whose
+The teacher ___ class we enjoy is very friendly.	Relative Pronouns	B1	<b>Who</b>se shows possession.	1	whose	who	which	where
+Choose the correct relative pronoun<br>The manager ___ you spoke to earlier will call you back.	Relative Pronouns	B1	<b>Who</b> is used for people as the object of the relative clause.	1	who	which	where	whose
+Complete the sentence<br>This is the reason ___ many students struggle with pronunciation.	Relative Pronouns	B1	<b>Why</b> is used to explain a reason.	1	why	which	where	that
+The scientist ___ discovery changed medicine won a prize.	Relative Pronouns	B2	<b>Who</b>se shows possession or relationship.	1	whose	who	which	that
+I finally read the article ___ you recommended last week.	Relative Pronouns	B1	<b>That</b> is common in spoken English <b>Where</b> the pronoun is the object.	1	that	who	where	whose
+Complete the sentence<br>The conference ___ we discussed new teaching methods was very useful.	Relative Pronouns	B2	<b>Where</b> refers to an event or place.	1	where	which	who	whose
+The woman ___ husband works abroad manages the business alone.	Relative Pronouns	B1	<b>Who</b>se expresses possession with people.	1	whose	who	which	where
+That is the student ___ progress has improved the most this term.	Relative Pronouns	B2	<b>Who</b>se is used with abstract nouns like progress.	1	whose	who	which	where
+Complete the sentence<br>I remember the moment ___ I realized English was important for my career.	Relative Pronouns	B1	<b>Where</b> is used to refer to time.	1	when	which	where	that
+The company ___ offices are in Accra is expanding quickly.	Relative Pronouns	B2	<b>Who</b>se can be used for organizations and things.	1	whose	who	which	where
+The course ___ we are taking requires a lot of speaking practice.	Relative Pronouns	B1	<b>That</b> is natural and correct for things as objects.	1	that	who	where	whose
+Complete the sentenceShe is the nurse ___ looked after my mother.	Relative Pronouns	B1	<b>Who</b> is used for people as the subject of the relative clause.	1	who	which	where	whose
+Jack is attending a course ___ he is preparing for his future job.	Relative Pronouns	B2	<b>That</b> can be used for things or ideas as the object of the clause.	1	that	who	where	whose
+That’s the bungalow ___ the Miller family live.	Relative Pronouns	B1	<b>Where</b> is used to refer to a place.	1	where	which	who	that
+Complete the sentenceThe police found the weapon ___ the robbers used.	Relative Pronouns	B1	<b>That</b> is common in spoken English for things as objects.	1	that	who	where	whose
+Who ate the chocolate ___ was in the box?	Relative Pronouns	B1	<b>That</b> or <b>Which</b> is used for things as the subject.	1	that	who	where	whose
+Is she the secretary ___ works for you?	Relative Pronouns	B1	<b>Who</b> is used for people as the subject of the clause.	1	who	which	where	whose
+Complete the sentenceI know a shop ___ they sell cheap clothes.	Relative Pronouns	B1	<b>Where</b> is used for places, especially with activities.	1	where	which	who	that
+Do you know the person ___ repaired my roof?	Relative Pronouns	B1	<b>Who</b> refers to a person as the subject.	1	who	which	where	whose
+Where are the letters ___ you started writing?	Relative Pronouns	B1	<b>That</b> is natural for things as objects in spoken English.	1	that	who	where	whose
+Complete the sentenceI’d like to have something ___ isn’t too sweet.	Relative Pronouns	B1	<b>That</b> or <b>Which</b> can refer to things as the subject.	1	that	who	where	whose
+Do you know ___ the man with the brown cap is?	Relative Clauses (Embedded Question)	B2	<b>Who</b> introduces an indirect question about a person.	1	who	which	where	that
+This is the house ___ Winston Churchill lived in.	Relative Pronouns	B1	<b>That</b> is commonly used for places as objects of prepositions.	1	that	who	where	whose
+Complete the sentenceWe visited the public school ___ my mother went.	Relative Pronouns	B1	<b>Where</b> refers to a place without repeating the preposition.	1	where	which	who	that
+We visited the public school ___ my mother went to.	Relative Pronouns	B1	<b>That</b> is correct <b>Where</b> the preposition appears at the end.	1	that	where	who	whose
+Do you know anyone ___ can repair my laptop?	Relative Pronouns	B1	<b>Who</b> is used for people as the subject of the clause.	1	who	which	where	whose
+Complete the sentenceIs he the person ___ lives with you?	Relative Pronouns	B1	<b>Who</b> is used for people as the subject of a relative clause.	1	who	which	whose	whom
+The man, ___ wife is a famous violinist, can also play the piano.	Relative Pronouns	B2	<b>Who</b>se shows possession.	1	whose	who	which	whom
+The Johnson family, ___ son moved to the U.K., lives in Canada.	Relative Pronouns	B2	<b>Who</b>se expresses family relationship or possession.	1	whose	who	which	whom
+Complete the sentenceThe man called his wife, ___ picked up the phone immediately.	Relative Pronouns	B2	<b>Who</b> is used for people in non-defining clauses.	1	who	that	whom	whose
+Can you tell me about the policeman ___ you spoke with this morning?	Relative Pronouns	B2	<b>Who</b> is commonly used instead of <b>Who</b>m in spoken English.	1	who	which	whose	where
+The bad weather is the reason ___ I didn’t come yesterday.	Relative Pronouns	B1	<b>Why</b> introduces a reason.	1	why	which	where	that
+Complete the sentenceFood ___ is imported is often more expensive.	Relative Pronouns	B1	<b>That</b> or <b>Which</b> is used for things as subjects.	1	that	who	whose	where
+I know a great restaurant ___ we can get good food.	Relative Pronouns	B1	<b>Where</b> refers to a place.	1	where	which	who	that
+The policeman spoke to the children ___ mothers were waiting outside.	Relative Pronouns	B2	<b>Who</b>se shows possession.	1	whose	who	which	whom
+Complete the sentenceI helped the old lady ___ books fell on the floor.	Relative Pronouns	B1	<b>Who</b>se refers to ownership.	1	whose	who	which	where
+Do you know ___ there are no elephants in South America?	Relative / Indirect Questions	B2	<b>Why</b> introduces an indirect question.	1	why	which	that	where
+My parents remember the time ___ there was no internet.	Relative Pronouns	B1	<b>Where</b> is used for time references.	1	when	which	where	that
+Complete the sentenceThe cake ___ my mother made tasted great.	Relative Pronouns	B1	<b>That</b> is common for things as objects.	1	that	who	where	whose
+The fireman rescued the girl ___ was trapped on the third floor.	Relative Pronouns	B1	<b>Who</b> is used for people as subjects.	1	who	which	whom	whose
+The woman ___ dog barks all night lives next door.	Relative Pronouns	B1	<b>Who</b>se shows possession.	1	whose	who	which	where
+Complete the sentenceI often visit my grandparents, ___ live a few blocks away.	Relative Pronouns	B2	<b>Who</b> is used in non-defining clauses.	1	who	that	whom	whose
+Avatar, ___ we watched last week, won several awards.	Relative Pronouns	B2	<b>Which</b> refers to a film or thing in non-defining clauses.	1	which	that	who	whose
+My dad knows a man ___ brother works abroad.	Relative Pronouns	B2	<b>Who</b>se expresses family relationship.	1	whose	who	which	whom
+Complete the sentenceI visited one of my uncles, ___ lives across town.	Relative Pronouns	B2	<b>Who</b> introduces extra information.	1	who	that	whom	whose
+The office is a place ___ I can work quietly.	Relative Pronouns	B1	<b>Where</b> refers to places.	1	where	which	who	that
+Give the medicine to the parents ___ child is sick.	Relative Pronouns	B1	<b>Who</b>se shows possession.	1	whose	who	which	where
+Complete the sentenceMost of the people ___ she met were refugees.	Relative Pronouns	B2	<b>Who</b> is commonly used as an object in spoken English.	1	who	which	whose	where
+My classmate, ___ studied hard, still failed the exam.	Relative Pronouns	B2	<b>Who</b> introduces non-essential information.	1	who	that	whom	whose
+There is the cafeteria ___ we can have lunch.	Relative Pronouns	B1	<b>Where</b> refers to a place used for an activity.	1	where	which	who	that
+Complete the sentenceThe man ___ sold me the car is my neighbour.	Relative Pronouns	B1	<b>Who</b> is used for people as subjects.	1	who	which	whom	whose
+The new movie is about a boy ___ has lost his parents in a car accident.	Relative Pronouns	B1	<b>Who</b> is used for people as the subject of the relative clause.	1	who	which	whose	where
+He is the young man, ___ wife left him for someone else.	Relative Pronouns	B2	<b>Who</b>se shows possession.	1	whose	who	which	where
+The DVD recorder ___ I bought at this store a few days ago is not working.	Relative Pronouns	B1	<b>Which</b> is used for things as the object of the clause.	1	which	who	where	whose
+That’s the book ___ I recommended reading in class.	Relative Pronouns	B1	<b>That</b> is natural in spoken English for objects.	1	that	who	where	whose
+Is this the hotel ___ you are staying for the tournament?	Relative Pronouns	B1	<b>Where</b> is used for places.	1	where	which	who	whose
+My dad, ___ travels a lot on business, is in Australia at the moment.	Relative Pronouns	B2	<b>Who</b> introduces extra (non-defining) information about a person.	1	who	that	whom	whose
+It was midnight ___ the first rescue team arrived at the scene of the accident.	Relative Pronouns	B1	<b>Where</b> is used to refer to time.	1	when	which	why	where
+There are several reasons ___ I am not allowed to give you any information.	Relative Pronouns	B1	<b>Why</b> introduces a reason.	1	why	which	where	that
+We stayed at the famous Rockstar hotel, ___ also had an indoor swimming pool.	Relative Pronouns	B2	<b>Which</b> refers to a thing in a non-defining clause.	1	which	that	who	where
+Did you write back to the person ___ offered you a job?	Relative Pronouns	B1	<b>Who</b> is used for people as the subject.	1	who	which	where	whose
+The story is about a young woman ___ 5-year-old son suddenly disappears.	Relative Pronouns	B2	<b>Who</b>se expresses possession or family relationship.	1	whose	who	which	where
+The tennis court ___ they usually play is currently not available.	Relative Pronouns	B1	<b>Where</b> refers to a place used for an activity.	1	where	which	who	whose
+My sister was born at a time ___ my dad was out of work.	Relative Pronouns	B1	<b>Where</b> is used with time expressions.	1	when	which	why	where
+Where is the money ___ I gave you yesterday?	Relative Pronouns	B1	<b>That</b> is common for things as objects.	1	that	who	where	whose
+That’s the man ___ I spoke to the other day.	Relative Pronouns	B1	<b>Who</b> is commonly used as an object in spoken English.	1	who	which	where	whose
+Mr. Fields, ___ sister is one of the leading experts in this country, spoke about the dangers of the virus.	Relative Pronouns	B2	<b>Who</b>se shows possession in non-defining clauses.	1	whose	who	which	where
+He didn’t tell us ___ he made such an irresponsible decision.	Relative Pronouns	B1	<b>Why</b> introduces an indirect explanation.	1	why	which	that	where
+The present ___ I got from my boyfriend was really fantastic.	Relative Pronouns	B1	<b>That</b> is natural for things as objects.	1	that	who	where	whose
+I have to buy a present for my mother, ___ birthday is next week.	Relative Pronouns	B2	<b>Who</b>se expresses possession with people.	1	whose	who	which	where
+The youth hostel ___ we stayed last week was really big.	Relative Pronouns	B1	<b>Where</b> is used for places.	1	where	which	who	whose`
+  };
+
+  // Parser: Extract metadata and array of questions
+  function parseTSV(quizPkg) {
+    const lines = quizPkg.rawTSVData.trim().split('\n');
+    const questions = lines.map(line => {
+      const parts = line.split('\t');
+      return {
+        question: parts[0]?.trim() || '',
+        topic: parts[1]?.trim() || 'Grammar',
+        level: parts[2]?.trim() || 'A2',
+        explanation: parts[3]?.trim() || '',
+        correctOptionIndex: parseInt(parts[4]?.trim(), 10) - 1,
+        options: [
+          parts[5]?.trim(),
+          parts[6]?.trim(),
+          parts[7]?.trim(),
+          parts[8]?.trim()
+        ].filter(Boolean)
+      };
+    });
+
+    return {
+      title: quizPkg.quizName,
+      questions: questions
+    };
+  }
+
+  // Quiz Engine Logic
+  class QuizEngine {
+    constructor(quizData) {
+      this.title = quizData.title;
+      this.questions = quizData.questions;
+      this.currentIndex = 0;
+      this.score = 0;
+      this.hasAnswered = false;
+
+      // DOM Handles
+      this.quizNameEl = document.getElementById('quiz-name');
+      this.uiQuiz = document.getElementById('quiz-ui');
+      this.uiResults = document.getElementById('results-ui');
+      this.topicBadge = document.getElementById('topic-badge');
+      this.levelBadge = document.getElementById('level-badge');
+      this.counter = document.getElementById('counter');
+      this.progress = document.getElementById('progress');
+      this.questionText = document.getElementById('question-text');
+      this.optionsContainer = document.getElementById('options-container');
+      this.explanation = document.getElementById('explanation');
+      this.nextBtn = document.getElementById('next-btn');
+
+      this.nextBtn.addEventListener('click', () => this.nextQuestion());
+      
+      // Initialize Title and View
+      this.quizNameEl.textContent = this.title;
+      this.render();
+    }
+
+    getCurrentQuestion() {
+      return this.questions[this.currentIndex];
+    }
+
+    render() {
+      this.hasAnswered = false;
+      const q = this.getCurrentQuestion();
+
+      this.topicBadge.textContent = q.topic;
+      this.levelBadge.textContent = q.level;
+      this.counter.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
+      this.progress.style.width = `${((this.currentIndex) / this.questions.length) * 100}%`;
+      
+      this.questionText.innerHTML = q.question;
+      this.explanation.style.display = 'none';
+      this.nextBtn.style.display = 'none';
+      this.optionsContainer.innerHTML = '';
+
+      q.options.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => this.handleAnswer(index, btn));
+        this.optionsContainer.appendChild(btn);
+      });
+    }
+
+    handleAnswer(selectedIndex, selectedBtn) {
+      if (this.hasAnswered) return;
+      this.hasAnswered = true;
+
+      const q = this.getCurrentQuestion();
+      const buttons = this.optionsContainer.querySelectorAll('.option-btn');
+
+      if (selectedIndex === q.correctOptionIndex) {
+        selectedBtn.classList.add('correct');
+        this.score++;
+      } else {
+        selectedBtn.classList.add('incorrect');
+        buttons[q.correctOptionIndex].classList.add('correct');
+      }
+
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (q.explanation) {
+        this.explanation.innerHTML = q.explanation;
+        this.explanation.style.display = 'block';
+      }
+
+      this.nextBtn.style.display = 'inline-block';
+    }
+
+    nextQuestion() {
+      this.currentIndex++;
+      if (this.currentIndex < this.questions.length) {
+        this.render();
+      } else {
+        this.showResults();
+      }
+    }
+
+    showResults() {
+      this.uiQuiz.style.display = 'none';
+      this.uiResults.style.display = 'block';
+
+      const percentage = Math.round((this.score / this.questions.length) * 100);
+      document.getElementById('score').textContent = `${percentage}%`;
+      document.getElementById('score-details').textContent = 
+        `You answered ${this.score} out of ${this.questions.length} questions correctly.`;
+    }
+  }
+
+  // Run engine with parsed object
+  const quizData = parseTSV(quizPackage);
+  new QuizEngine(quizData);
+</script>
+</body>
+</html>
