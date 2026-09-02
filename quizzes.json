@@ -1,3 +1,4 @@
+Here is the updated quizzes.json with the new Relative Pronouns quiz appended to your existing schema:
 [
   {
     "file": "English_Practice_GitHub_WebApp_v2.html",
@@ -28,8 +29,7 @@
     "file": "adjective-vs-adverb-2.html",
     "date": "2026-08-27",
     "version": 1
-  }
-  ,
+  },
   {
     "file": "basic-connectors-1.html",
     "date": "2026-08-27",
@@ -39,9 +39,14 @@
     "file": "word-family-1.html",
     "date": "2026-08-27",
     "version": 1
+  },
+  {
+    "file": "relative-pronouns.html",
+    "date": "2026-09-02",
+    "version": 1
   }
-  
 ]
+
 
 
 
